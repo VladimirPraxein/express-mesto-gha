@@ -31,7 +31,9 @@ const deleteCard = (req, res) => {
     .then((card) => {
       if (String(card.owner) === owner) {
         card.remove();
+        return res.status(200).send(card);
       }
+      return res.status(BadRequest).send({ message: 'Невозможно удалить чужую карточку' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
