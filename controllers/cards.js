@@ -33,10 +33,13 @@ const deleteCard = (req, res) => {
         card.remove();
         return res.status(200).send(card);
       }
-      return res.status(BadRequest).send({ message: 'Невозможно удалить чужую карточку' });
+      return 'Невозможно удалить чужую карточу';
     })
     .catch((err) => {
       if (err.name === 'CastError') {
+        return res.status(BadRequest).send({ message: 'Карточка с указанным _id не найдена.' });
+      }
+      if (err.name === 'TypeError') {
         return res.status(NotFound).send({ message: 'Карточка с указанным _id не найдена.' });
       }
       return res.status(ServerError).send({ message: 'Произошла ошибка' });
