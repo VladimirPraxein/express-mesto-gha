@@ -12,7 +12,7 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '63ced393e3eaef6eaccc3399',
+    _id: '63d3bcb55c3f24b48f04617a',
   };
 
   next();
@@ -27,6 +27,6 @@ mongoose
   .then(() => console.log('Connetced to MongoDB'))
   .catch((err) => console.log(`DB connection error ${err}`));
 
-app.listen(PORT, (err) => {
-  err ? console.log(err) : console.log(`App listening on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}`);
 });

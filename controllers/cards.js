@@ -43,18 +43,23 @@ const deleteCard = (req, res) => {
 
 const likeCard = (req, res) => {
   const { cardId } = req.params;
-  Card.findByIdAndUpdate(
+  return Card.findByIdAndUpdate(
     cardId,
-    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+    { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.status(200).send(card))
+    .then((card) => {
+      if (card) {
+        return res.status(200).send(card);
+      }
+      return res.status(NotFound).send({ message: 'Передан несуществующий _id карточки.' });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BadRequest).send({ message: 'Переданы некорректные данные для постановки для постановки лайка.' });
+        return res.status(BadRequest).send({ message: 'Переданы некорректные данные для постановки лайка.' });
       }
       if (err.name === 'CastError') {
-        return res.status(NotFound).send({ message: 'Передан несуществующий _id карточки.' });
+        return res.status(BadRequest).send({ message: 'Передан несуществующий _id карточки.' });
       }
       return res.status(ServerError).send({ message: 'Произошла ошибка' });
     });
@@ -62,18 +67,23 @@ const likeCard = (req, res) => {
 
 const dislikeCard = (req, res) => {
   const { cardId } = req.params;
-  Card.findByIdAndUpdate(
+  return Card.findByIdAndUpdate(
     cardId,
-    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.status(200).send(card))
+    .then((card) => {
+      if (card) {
+        return res.status(200).send(card);
+      }
+      return res.status(NotFound).send({ message: 'Передан несуществующий _id карточки.' });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BadRequest).send({ message: 'Переданы некорректные данные для постановки для снятии лайка.' });
+        return res.status(BadRequest).send({ message: 'Переданы некорректные данные для снятии лайка.' });
       }
       if (err.name === 'CastError') {
-        return res.status(NotFound).send({ message: 'Передан несуществующий _id карточки.' });
+        return res.status(BadRequest).send({ message: 'Передан несуществующий _id карточки.' });
       }
       return res.status(ServerError).send({ message: 'Произошла ошибка' });
     });
