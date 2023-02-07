@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 
+const { urlPattern } = require('./utils/constants');
+
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 
@@ -13,7 +15,7 @@ const NotFound = require('./errors/notFound');
 
 const { PORT = 3000 } = process.env;
 const URL = 'mongodb://localhost:27017/mestodb';
-const urlPattern = /^(http(s):\/\/.)[-a-zA-Z0-9:%._+~#=]{2,256}\/[-a-zA-Z0-9:%._+~#=]{2,256}/;
+
 const app = express();
 
 app.use(bodyParser.json());

@@ -39,13 +39,7 @@ const getMe = (req, res, next) => {
       }
       throw new NotFound('Пользователь по указанному _id не найден.');
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequest('Передан невалидный _id пользователя.'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const createUser = async (req, res, next) => {
