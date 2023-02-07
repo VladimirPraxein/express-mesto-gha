@@ -48,20 +48,31 @@ const getMe = (req, res, next) => {
     });
 };
 
-const createUser = (req, res, next) => {
+const createUser = async (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  bcrypt
-    .hash(password, 10)
-    .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
-    }))
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.code === 11000) {
+  User.findOne({ email })
+    .then((existingUser) => {
+      if (existingUser) {
         next(new Conflict('Такой пользователь уже существует.'));
-      } else if (err.name === 'ValidationError') {
+      } else {
+        bcrypt
+          .hash(password, 10)
+          .then((hash) => User.create({
+            name, about, avatar, email, password: hash,
+          }))
+          .then((user) => res.send({
+            name: user.name,
+            about: user.about,
+            avatar: user.avatar,
+            email: user.email,
+            _id: user._id,
+          }));
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
         next(new BadRequest('Переданы некорректные данные при создании пользователя.'));
       } else {
         next(err);
@@ -108,27 +119,16 @@ const updateUserAvatar = (req, res, next) => {
 };
 
 const login = (req, res, next) => {
-  const {
-    name, about, avatar, email, password, _id,
-  } = req.body;
+  const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
-    .then(() => {
+    .then((user) => {
       const token = jwt.sign(
-        { _id },
+        { _id: user._id },
         'some-secret-key',
         { expiresIn: '7d' },
       );
-      res
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-        })
-        .send({
-          data: {
-            name, about, avatar, email, _id,
-          },
-        });
+      res.send({ token });
     })
     .catch(next);
 };

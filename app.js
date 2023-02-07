@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
+const bodyParser = require('body-parser');
 
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
@@ -12,11 +13,21 @@ const NotFound = require('./errors/notFound');
 
 const { PORT = 3000 } = process.env;
 const URL = 'mongodb://localhost:27017/mestodb';
-
-const urlPattern = /^https?:\/\/(\w+:?\w*@)?(\S+(?::\S*))(:[0-9]+)?(\/|\/([\w#!:.?+=&%@\-/]))?/;
-
+const urlPattern = /^(http(s):\/\/.)[-a-zA-Z0-9:%._+~#=]{2,256}\/[-a-zA-Z0-9:%._+~#=]{2,256}/;
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(express.json());
+
+mongoose
+  .connect(URL)
+  .then(() => console.log('Connetced to MongoDB'))
+  .catch((err) => console.log(`DB connection error ${err}`));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -50,11 +61,6 @@ app.use('*', (req, res, next) => {
 
 app.use(errors());
 app.use('/', require('./middlewares/errorHandler'));
-
-mongoose
-  .connect(URL)
-  .then(() => console.log('Connetced to MongoDB'))
-  .catch((err) => console.log(`DB connection error ${err}`));
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
