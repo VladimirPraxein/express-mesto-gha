@@ -1,4 +1,6 @@
 const express = require('express');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
 const bodyParser = require('body-parser');
@@ -14,9 +16,17 @@ const auth = require('./middlewares/auth');
 const NotFound = require('./errors/notFound');
 
 const { PORT = 3000 } = process.env;
-const URL = 'mongodb://localhost:27017/mestodb';
+const { URL = 'mongodb://localhost:27017/mestodb' } = process.env;
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const app = express();
+app.use(limiter);
+app.use(helmet());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

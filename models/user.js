@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { isEmail } = require('validator');
+const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
 const Unauthorized = require('../errors/unauthorized');
@@ -20,13 +20,18 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (v) => validator.isURL(v),
+      message: 'Некорректный URL',
+    },
   },
   email: {
     type: String,
     required: true,
     unique: true,
     validate: {
-      validator: isEmail,
+      validator: (v) => validator.isEmail(v),
+      message: 'Неккоректная почта',
     },
   },
   password: {
