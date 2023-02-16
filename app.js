@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+
 const { urlPattern } = require('./utils/constants');
 
 const { login, createUser } = require('./controllers/users');
@@ -16,13 +18,14 @@ const auth = require('./middlewares/auth');
 const NotFound = require('./errors/notFound');
 
 const { PORT = 3000 } = process.env;
-const { URL = 'mongodb://localhost:27017/mestodb' } = process.env;
+const { URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
 });
+mongoose.set('strictQuery', true);
 
 const app = express();
 app.use(limiter);
@@ -40,6 +43,8 @@ mongoose
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(requestLogger);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -66,6 +71,8 @@ app.use(auth);
 app.use(usersRouter);
 
 app.use(cardsRouter);
+
+app.use(errorLogger);
 
 app.use('*', (req, res, next) => {
   next(new NotFound('Запрашиваемый ресурс не найден.'));
