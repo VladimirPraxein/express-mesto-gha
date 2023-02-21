@@ -35,7 +35,13 @@ const getMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (user) {
-        res.send({ user });
+        res.send({
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+          _id: user._id,
+        });
       }
       throw new NotFound('Пользователь по указанному _id не найден.');
     })
